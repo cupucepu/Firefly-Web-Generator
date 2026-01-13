@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Gambar Firefly</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        input { width: 80%; padding: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        button { padding: 15px 30px; background-color: #ff4500; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #e03e00; }
+        #result { margin-top: 20px; }
+        img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .loading { color: #666; font-style: italic; display: none; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Firefly Generator</h1>
+    <p>Ketik imajinasimu di bawah ini:</p>
+    
+    <input type="text" id="prompt" placeholder="Contoh: Kucing astronot makan pizza...">
+    <br>
+    <button onclick="generate()">Buat Gambar</button>
+    
+    <div class="loading" id="loading">Sedang memproses... Tunggu ya...</div>
+    <div id="result"></div>
+
+    <script>
+        async function generate() {
+            const prompt = document.getElementById('prompt').value;
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if(!prompt) return alert("Isi teks dulu dong!");
+
+            resultDiv.innerHTML = "";
+            loadingDiv.style.display = "block";
+
+            try {
+                // Panggil 'Otak' di server (API Route)
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: prompt })
+                });
+                
+                const data = await response.json();
+                
+                if(data.url) {
+                    resultDiv.innerHTML = `<img src="${data.url}" alt="Hasil Gambar"><br><p>Klik kanan gambar untuk Simpan</p>`;
+                } else {
+                    resultDiv.innerText = "Gagal: " + (data.error || "Unknown error");
+                }
+            } catch (e) {
+                resultDiv.innerText = "Error koneksi!";
+            } finally {
+                loadingDiv.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
